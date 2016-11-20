@@ -57,7 +57,7 @@ Messenger bots uses a web server to process messages it receives or to figure ou
 
 12. Go to the facebook page created and locate 'Message Now' or go to https://m.me/PAGE_USERNAME
 
- ![Message on Page](/docs/images/13_message_on_page)
+ ![Message on Page](/docs/images/13_message_on_page.png)
 
 13. Enjoy chatting with Susi.
 

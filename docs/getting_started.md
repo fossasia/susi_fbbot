@@ -1,4 +1,4 @@
-# Facebook Messenger Installation
+# Getting Started : Facebook Susi AI Bot Installation 
 
 It's easy for you to create your own facebook messenger bot and integrate susi's API into it. You can read the  [documentation](https://developers.facebook.com/docs/messenger-platform/quickstart) as prepared by the Messenger team.
 

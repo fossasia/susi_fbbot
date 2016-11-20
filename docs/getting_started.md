@@ -55,7 +55,7 @@ Messenger bots uses a web server to process messages it receives or to figure ou
  curl -X POST "https://graph.facebook.com/v2.6/me/subscribed_apps?access_token=<PAGE_ACCESS_TOKEN>"
  ```
 
-12. Go to the facebook page created and locate 'Message Now' or go to https://m.me/&lt;PAGE_USERNAME&gt;
+12. Go to the facebook page created and locate 'Message Now' or go to https://m.me/PAGE_USERNAME
 
  ![Message on Page](/docs/images/13_message_on_page)
 

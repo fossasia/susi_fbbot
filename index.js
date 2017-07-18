@@ -93,6 +93,51 @@ app.post('/webhook/', function (req, res) {
 				continue
 			}
 
+			var chatStart = text.toLowerCase();
+		      if(chatStart === 'get started' || chatStart === 'getting started' || chatStart === 'start'){
+		        var messageData = {
+		            "attachment":{
+		              "type":"template",
+		              "payload":{
+		                "template_type":"generic",
+		                "elements":[
+		                   {
+		                    "title":"Welcome to SUSI AI",
+		                    "subtitle":"I was build by open source community Fossasia",
+		                    "buttons":[
+		                      {
+		                        "type":"web_url",
+		                        "url":"https://github.com/fossasia/susi_server",
+		                        "title":"View Repository"
+		                      },{
+		                        "type":"postback",
+		                        "title":"Start Chatting",
+		                        "payload":"start_chatting"
+		                      }              
+		                    ]      
+		                  }
+		                ]
+		              }
+		            }
+		          }
+		          request({
+		          url: 'https://graph.facebook.com/v2.6/me/messages',
+		          qs: {access_token:token},
+		          method: 'POST',
+		          json: {
+		            recipient: {id:sender},
+		            message: messageData,
+		          }
+		          }, function(error, response, body) {
+		          if (error) {
+		            console.log('Error sending messages: ', error)
+		          } else if (response.body.error) {
+		            console.log('Error: ', response.body.error)
+		          }
+		        })
+		        continue;
+		      }
+
 			// Construct the query for susi
 			var queryUrl = 'http://api.asksusi.com/susi/chat.json?q='+encodeURI(text);
 			var message = '';
@@ -148,8 +193,8 @@ app.post('/webhook/', function (req, res) {
 			// sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
 		}
 		if (event.postback) {
-			var text = JSON.stringify(event.postback);
-			sendTextMessage(sender, "Postback received: "+text.substring(0, 200), token);
+			if(event.postback.payload === 'start_chatting')
+        		sendTextMessage(sender, "You can ask me anything. Your questions are my food and I am damn hungry!");
 			continue;
 		}
 	}

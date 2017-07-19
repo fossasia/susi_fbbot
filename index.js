@@ -14,9 +14,14 @@ app.use(bodyParser.json());
 // recommended to inject access tokens as environmental variables, e.g.
 var token = process.env.FB_PAGE_ACCESS_TOKEN;
 
-function sendTextMessage(sender, text) {
-	var messageData = { text:text };
-	
+function sendTextMessage(sender, text, flag) {
+	var messageData;
+	if(flag === 1){
+		messageData = { attachment: text };
+	}
+	else{
+		messageData = {text:text};
+	}
 	request({
 		url: 'https://graph.facebook.com/v2.6/me/messages',
 		qs: {access_token:token},
@@ -123,43 +128,75 @@ app.post('/webhook/', function (req, res) {
 					{
 						if(body.answers[0].actions[1]){
 							if(body.answers[0].actions[1].type === 'rss'){
-								message += 'I found this on the web-:\n\n';
+								sendTextMessage(sender, "I found this on the web:", 0);
+								var arr = [];
 								var metaCnt = body.answers[0].metadata.count;
-								for(var i=0;i<((metaCnt>5)?5:metaCnt);i++){
-										message += ('Title : ');
-										message += body.answers[0].data[i].title+', ';
-										message += ('Link : ');
-										message += body.answers[0].data[i].link+', ';
-									message += '\n\n';
+								for(var i=0;i<((metaCnt>4)?4:metaCnt);i++){
+									arr.push(
+										{
+											"title": body.answers[0].data[i].title,
+											"subtitle": body.answers[0].data[i].link
+										}
+									);
 								}
+								message = {
+									"type": "template",
+									"payload": 
+									{
+										"template_type": "list",
+										"top_element_style": "compact",
+										"elements": arr
+									}
+								};
+								sendTextMessage(sender, message, 1);
 							}
 						}
 						else{
 							if(body.answers[0].actions[0].type === 'table'){
 								var colNames = body.answers[0].actions[0].columns;
 								if((body.answers[0].metadata.count)>5)
-									message += 'Due to message limit, only some results are shown-:\n\n';
+									sendTextMessage(sender, "Due to message limit, only some results are shown:", 0);
 								else
-									message += 'Results are shown below-:\n\n';
+									sendTextMessage(sender, "Results are shown below:", 0);
 								var metaCnt = body.answers[0].metadata.count;
-								for(var i=0;i<((metaCnt>5)?5:metaCnt);i++){
+								var arr = [];
+								for(var i=0;i<((metaCnt>4)?4:metaCnt);i++){
+									var titleStr = '';
+									var subtitleStr = '';
 									for(var cN in colNames){
-										message += (colNames[cN]+' : ');
-										message += body.answers[0].data[i][cN]+', ';
+										if(titleStr !== '')
+											break;
+										titleStr = subtitleStr;
+										subtitleStr = body.answers[0].data[i][cN]; 	
 									}
-									message += '\n\n';
+									arr.push(
+										{
+											"title": subtitleStr,
+											"subtitle": titleStr             
+										}
+									);
 								}
+								message = {
+									"type": "template",
+									"payload": 
+									{
+										"template_type": "list",
+										"top_element_style": "compact",
+										"elements": arr
+									}
+								};
+								sendTextMessage(sender, message, 1);
 							}
 							else
 							{
 								message = body.answers[0].actions[0].expression;
+								sendTextMessage(sender, message, 0);
 							}
 						}
-						sendTextMessage(sender, message);
 					}
 				} else {
 					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
-					sendTextMessage(sender, message);
+					sendTextMessage(sender, message,0);
 				}
 			});
 			// sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))

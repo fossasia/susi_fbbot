@@ -131,7 +131,7 @@ app.post('/webhook/', function (req, res) {
 								sendTextMessage(sender, "I found this on the web:", 0);
 								var arr = [];
 								var metaCnt = body.answers[0].metadata.count;
-								for(var i=0;i<((metaCnt>4)?4:metaCnt);i++){
+								for(var i=0;i<((metaCnt>10)?10:metaCnt);i++){
 									arr.push(
 										{
 											"title": body.answers[0].data[i].title,
@@ -143,8 +143,7 @@ app.post('/webhook/', function (req, res) {
 									"type": "template",
 									"payload": 
 									{
-										"template_type": "list",
-										"top_element_style": "compact",
+										"template_type": "genric",
 										"elements": arr
 									}
 								};
@@ -154,13 +153,13 @@ app.post('/webhook/', function (req, res) {
 						else{
 							if(body.answers[0].actions[0].type === 'table'){
 								var colNames = body.answers[0].actions[0].columns;
-								if((body.answers[0].metadata.count)>5)
+								if((body.answers[0].metadata.count)>10)
 									sendTextMessage(sender, "Due to message limit, only some results are shown:", 0);
 								else
 									sendTextMessage(sender, "Results are shown below:", 0);
 								var metaCnt = body.answers[0].metadata.count;
 								var arr = [];
-								for(var i=0;i<((metaCnt>4)?4:metaCnt);i++){
+								for(var i=0;i<((metaCnt>10)?10:metaCnt);i++){
 									var titleStr = '';
 									var subtitleStr = '';
 									for(var cN in colNames){
@@ -180,8 +179,7 @@ app.post('/webhook/', function (req, res) {
 									"type": "template",
 									"payload": 
 									{
-										"template_type": "list",
-										"top_element_style": "compact",
+										"template_type": "genric",
 										"elements": arr
 									}
 								};

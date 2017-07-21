@@ -143,8 +143,7 @@ app.post('/webhook/', function (req, res) {
 									"type": "template",
 									"payload": 
 									{
-										"template_type": "list",
-										"top_element_style": "compact",
+										"template_type": "genric",
 										"elements": arr
 									}
 								};
@@ -154,7 +153,7 @@ app.post('/webhook/', function (req, res) {
 						else{
 							if(body.answers[0].actions[0].type === 'table'){
 								var colNames = body.answers[0].actions[0].columns;
-								if((body.answers[0].metadata.count)>5)
+								if((body.answers[0].metadata.count)>4)
 									sendTextMessage(sender, "Due to message limit, only some results are shown:", 0);
 								else
 									sendTextMessage(sender, "Results are shown below:", 0);
@@ -180,8 +179,7 @@ app.post('/webhook/', function (req, res) {
 									"type": "template",
 									"payload": 
 									{
-										"template_type": "list",
-										"top_element_style": "compact",
+										"template_type": "genric",
 										"elements": arr
 									}
 								};

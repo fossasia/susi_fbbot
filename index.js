@@ -14,6 +14,31 @@ app.use(bodyParser.json());
 // recommended to inject access tokens as environmental variables, e.g.
 var token = process.env.FB_PAGE_ACCESS_TOKEN;
 
+var buttons = [
+	              {
+	                "type":"element_share",
+	              	"share_contents": { 
+			          "attachment": {
+			            "type": "template",
+			            "payload": {
+			              "template_type": "generic",
+			              "elements": [
+			                {
+			                  "title": "I had an amazing chat with SUSI. Do you wanna chat too?",
+			                  "buttons": [
+			                    {
+			                      "type": "web_url",
+			                      "url": "https://m.me/asksusisu", 
+			                      "title": "Chat with SUSI AI"
+			                    }
+			                  ]
+			                }
+			              ]
+			            }
+			          }
+			        }
+	              } 
+	          ];
 function sendTextMessage(sender, text, flag) {
 	var messageData;
 	if(flag === 1){
@@ -142,7 +167,8 @@ app.post('/webhook/', function (req, res) {
 									arr.push(
 										{
 											"title": body.answers[0].data[i].title,
-											"subtitle": body.answers[0].data[i].link
+											"subtitle": body.answers[0].data[i].link,
+											"buttons": buttons
 										}
 									);
 								}
@@ -178,7 +204,8 @@ app.post('/webhook/', function (req, res) {
 									arr.push(
 										{
 											"title": subtitleStr,
-											"subtitle": titleStr             
+											"subtitle": titleStr,
+											"buttons": buttons             
 										}
 									);
 								}
@@ -194,8 +221,22 @@ app.post('/webhook/', function (req, res) {
 							}
 							else
 							{
-								message = body.answers[0].actions[0].expression;
-								sendTextMessage(sender, message, 0);
+								var messageTitle = body.answers[0].actions[0].expression;
+								message = {
+									"type": "template",
+									"payload": 
+									{
+										"template_type": "generic",
+										"elements": [
+														{
+					            							"title": messageTitle,
+					            							"buttons": buttons
+					            						}
+					            		]
+									}
+								};
+								
+								sendTextMessage(sender, message, 1);
 							}
 						}
 					}

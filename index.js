@@ -58,7 +58,13 @@ function sendGenericMessage(sender, title, subtitle, image_url) {
 		qs: {access_token:token},
 		method: 'POST',
 		json: {
-			recipient: {id:sender},
+			recipient: {
+				/* The phone_number field can also be used instead of id field here, to message the owner of that phone number:
+				 * phone_number: "FILL_HERE_PHONE_NUMBER",
+				 * till now this feature can be used for developers, testers and admins of the ask susi fb page.
+				 */
+				id:sender
+			},
 			message: messageData,
 		}
 	}, function(error, response, body) {
@@ -70,6 +76,7 @@ function sendGenericMessage(sender, title, subtitle, image_url) {
 	})
 }
 
+// Add a get started button to the messenger
 request({
 	url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
 	qs: {access_token:token},
@@ -204,46 +211,29 @@ app.post('/webhook/', function (req, res) {
         		sendTextMessage(sender, "You can ask me anything. Your questions are my food and I am damn hungry!");
         	else if(event.postback.payload === 'GET_STARTED_PAYLOAD'){
         		var messageData = {
-		            "attachment":{
-		              "type":"template",
-		              "payload":{
-		                "template_type":"generic",
-		                "elements":[
-		                   {
-		                    "title":"Welcome to SUSI AI",
-		                    "subtitle":"I was build by open source community Fossasia",
-		                    "buttons":[
-		                      {
-		                        "type":"web_url",
-		                        "url":"https://github.com/fossasia/susi_server",
-		                        "title":"View Repository"
-		                      },{
-		                        "type":"postback",
-		                        "title":"Start Chatting",
-		                        "payload":"start_chatting"
-		                      }              
-		                    ]      
-		                  }
-		                ]
-		              }
-		            }
-		          }
-		          request({
-		          url: 'https://graph.facebook.com/v2.6/me/messages',
-		          qs: {access_token:token},
-		          method: 'POST',
-		          json: {
-		            recipient: {id:sender},
-		            message: messageData,
-		          }
-		          }, function(error, response, body) {
-		          if (error) {
-		            console.log('Error sending messages: ', error)
-		          } else if (response.body.error) {
-		            console.log('Error: ', response.body.error)
-		          }
-		        })
-		        continue;
+	              "type":"template",
+	              "payload":{
+	                "template_type":"generic",
+	                "elements":[
+	                   {
+	                    "title":"Welcome to SUSI AI",
+	                    "subtitle":"I am built by open source community Fossasia. Also, I am evolving continuously.",
+	                    "buttons":[
+	                      {
+	                        "type":"web_url",
+	                        "url":"https://github.com/fossasia/susi_server",
+	                        "title":"View Repository"
+	                      },{
+	                        "type":"postback",
+	                        "title":"Start Chatting",
+	                        "payload":"start_chatting"
+	                      }              
+	                    ]      
+	                  }
+	                ]
+	              }
+	            }
+	          	sendTextMessage(sender, messageData, 1);
         	}
 			continue;
 		}

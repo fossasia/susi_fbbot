@@ -119,17 +119,107 @@ request({
 	}
 })
 
-app.get('/', function (req, res) {
-	res.send('Susi says Hello.');
-});
 
-// for facebook verification
-app.get('/webhook/', function (req, res) {
-	if (req.query['hub.verify_token'] === 'my_voice_is_my_password_verify_me') {
-		res.send(req.query['hub.challenge']);
-	}
-	res.send('Error, wrong token');
-});
+function requestReply(sender, text){
+	// Construct the query for susi
+	var queryUrl = 'http://api.asksusi.com/susi/chat.json?q='+encodeURI(text);
+	var message = '';
+	// Wait until done and reply
+	request({
+		url: queryUrl,
+		json: true
+	}, function (error, response, body) {
+		if (!error && response.statusCode === 200) {
+			if(body.answers[0])
+			{
+				if(body.answers[0].actions[1]){
+					if(body.answers[0].actions[1].type === 'rss'){
+						sendTextMessage(sender, "I found this on the web:", 0);
+						var arr = [];
+						var metaCnt = body.answers[0].metadata.count;
+						for(var i=0;i<((metaCnt>10)?10:metaCnt);i++){
+							arr.push(
+								{
+									"title": body.answers[0].data[i].title,
+									"subtitle": body.answers[0].data[i].link,
+									"buttons": buttons
+								}
+							);
+						}
+						message = {
+							"type": "template",
+							"payload": 
+							{
+								"template_type": "genric",
+								"elements": arr
+							}
+						};
+						sendTextMessage(sender, message, 1);
+					}
+				}
+				else{
+					if(body.answers[0].actions[0].type === 'table'){
+						var colNames = body.answers[0].actions[0].columns;
+						if((body.answers[0].metadata.count)>10)
+							sendTextMessage(sender, "Due to message limit, only some results are shown:", 0);
+						else
+							sendTextMessage(sender, "Results are shown below:", 0);
+						var metaCnt = body.answers[0].metadata.count;
+						var arr = [];
+						for(var i=0;i<((metaCnt>10)?10:metaCnt);i++){
+							var titleStr = '';
+							var subtitleStr = '';
+							for(var cN in colNames){
+								if(titleStr !== '')
+									break;
+								titleStr = subtitleStr;
+								subtitleStr = body.answers[0].data[i][cN]; 	
+							}
+							arr.push(
+								{
+									"title": subtitleStr,
+									"subtitle": titleStr,
+									"buttons": buttons             
+								}
+							);
+						}
+						message = {
+							"type": "template",
+							"payload": 
+							{
+								"template_type": "genric",
+								"elements": arr
+							}
+						};
+						sendTextMessage(sender, message, 1);
+					}
+					else
+					{
+						var messageTitle = body.answers[0].actions[0].expression;
+						message = {
+							"type": "template",
+							"payload": 
+							{
+								"template_type": "generic",
+								"elements": [
+												{
+			            							"title": messageTitle,
+			            							"buttons": buttons
+			            						}
+			            		]
+							}
+						};
+						
+						sendTextMessage(sender, message, 1);
+					}
+				}
+			}
+		} else {
+			message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+			sendTextMessage(sender, message,0);
+		}
+	});
+}
 
 function persistentMenuGenerator(){
 	request({
@@ -140,7 +230,7 @@ function persistentMenuGenerator(){
 				  "persistent_menu":[
 				    {
 				      "locale":"default",
-				      "composer_input_disabled":true,
+				      "composer_input_disabled":false,
 				      "call_to_actions":[
 				        {
 				          "type":"postback",
@@ -153,10 +243,6 @@ function persistentMenuGenerator(){
 				          "webview_height_ratio":"full"
 				        }
 				      ]
-				    },
-				    {
-				      "locale":"zh_CN",
-				      "composer_input_disabled":false
 				    }
 				  ]
 				}
@@ -195,6 +281,18 @@ function deletePersistentMenu(){
 deletePersistentMenu();
 persistentMenuGenerator();
 
+app.get('/', function (req, res) {
+	res.send('Susi says Hello.');
+});
+
+// for facebook verification
+app.get('/webhook/', function (req, res) {
+	if (req.query['hub.verify_token'] === 'my_voice_is_my_password_verify_me') {
+		res.send(req.query['hub.challenge']);
+	}
+	res.send('Error, wrong token');
+});
+
 // to post data
 app.post('/webhook/', function (req, res) {
 	var messaging_events = req.body.entry[0].messaging
@@ -211,104 +309,7 @@ app.post('/webhook/', function (req, res) {
 				continue
 			}
 
-			// Construct the query for susi
-			var queryUrl = 'http://api.asksusi.com/susi/chat.json?q='+encodeURI(text);
-			var message = '';
-			// Wait until done and reply
-			request({
-				url: queryUrl,
-				json: true
-			}, function (error, response, body) {
-				if (!error && response.statusCode === 200) {
-					if(body.answers[0])
-					{
-						if(body.answers[0].actions[1]){
-							if(body.answers[0].actions[1].type === 'rss'){
-								sendTextMessage(sender, "I found this on the web:", 0);
-								var arr = [];
-								var metaCnt = body.answers[0].metadata.count;
-								for(var i=0;i<((metaCnt>10)?10:metaCnt);i++){
-									arr.push(
-										{
-											"title": body.answers[0].data[i].title,
-											"subtitle": body.answers[0].data[i].link,
-											"buttons": buttons
-										}
-									);
-								}
-								message = {
-									"type": "template",
-									"payload": 
-									{
-										"template_type": "genric",
-										"elements": arr
-									}
-								};
-								sendTextMessage(sender, message, 1);
-							}
-						}
-						else{
-							if(body.answers[0].actions[0].type === 'table'){
-								var colNames = body.answers[0].actions[0].columns;
-								if((body.answers[0].metadata.count)>10)
-									sendTextMessage(sender, "Due to message limit, only some results are shown:", 0);
-								else
-									sendTextMessage(sender, "Results are shown below:", 0);
-								var metaCnt = body.answers[0].metadata.count;
-								var arr = [];
-								for(var i=0;i<((metaCnt>10)?10:metaCnt);i++){
-									var titleStr = '';
-									var subtitleStr = '';
-									for(var cN in colNames){
-										if(titleStr !== '')
-											break;
-										titleStr = subtitleStr;
-										subtitleStr = body.answers[0].data[i][cN]; 	
-									}
-									arr.push(
-										{
-											"title": subtitleStr,
-											"subtitle": titleStr,
-											"buttons": buttons             
-										}
-									);
-								}
-								message = {
-									"type": "template",
-									"payload": 
-									{
-										"template_type": "genric",
-										"elements": arr
-									}
-								};
-								sendTextMessage(sender, message, 1);
-							}
-							else
-							{
-								var messageTitle = body.answers[0].actions[0].expression;
-								message = {
-									"type": "template",
-									"payload": 
-									{
-										"template_type": "generic",
-										"elements": [
-														{
-					            							"title": messageTitle,
-					            							"buttons": buttons
-					            						}
-					            		]
-									}
-								};
-								
-								sendTextMessage(sender, message, 1);
-							}
-						}
-					}
-				} else {
-					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
-					sendTextMessage(sender, message,0);
-				}
-			});
+			requestReply(sender, text);
 		}
 		if (event.postback) {
 			if(event.postback.payload === 'start_chatting')
@@ -340,104 +341,7 @@ app.post('/webhook/', function (req, res) {
 	          	sendTextMessage(sender, messageData, 1);
         	}
         	else if(event.postback.payload === 'latest_news'){
-        		// Construct the query for susi
-				var queryUrl = 'http://api.asksusi.com/susi/chat.json?q=news';
-				var message = '';
-				// Wait until done and reply
-				request({
-					url: queryUrl,
-					json: true
-				}, function (error, response, body) {
-					if (!error && response.statusCode === 200) {
-						if(body.answers[0])
-						{
-							if(body.answers[0].actions[1]){
-								if(body.answers[0].actions[1].type === 'rss'){
-									sendTextMessage(sender, "I found this on the web:", 0);
-									var arr = [];
-									var metaCnt = body.answers[0].metadata.count;
-									for(var i=0;i<((metaCnt>10)?10:metaCnt);i++){
-										arr.push(
-											{
-												"title": body.answers[0].data[i].title,
-												"subtitle": body.answers[0].data[i].link,
-												"buttons": buttons
-											}
-										);
-									}
-									message = {
-										"type": "template",
-										"payload": 
-										{
-											"template_type": "genric",
-											"elements": arr
-										}
-									};
-									sendTextMessage(sender, message, 1);
-								}
-							}
-							else{
-								if(body.answers[0].actions[0].type === 'table'){
-									var colNames = body.answers[0].actions[0].columns;
-									if((body.answers[0].metadata.count)>10)
-										sendTextMessage(sender, "Due to message limit, only some results are shown:", 0);
-									else
-										sendTextMessage(sender, "Results are shown below:", 0);
-									var metaCnt = body.answers[0].metadata.count;
-									var arr = [];
-									for(var i=0;i<((metaCnt>10)?10:metaCnt);i++){
-										var titleStr = '';
-										var subtitleStr = '';
-										for(var cN in colNames){
-											if(titleStr !== '')
-												break;
-											titleStr = subtitleStr;
-											subtitleStr = body.answers[0].data[i][cN]; 	
-										}
-										arr.push(
-											{
-												"title": subtitleStr,
-												"subtitle": titleStr,
-												"buttons": buttons             
-											}
-										);
-									}
-									message = {
-										"type": "template",
-										"payload": 
-										{
-											"template_type": "genric",
-											"elements": arr
-										}
-									};
-									sendTextMessage(sender, message, 1);
-								}
-								else
-								{
-									var messageTitle = body.answers[0].actions[0].expression;
-									message = {
-										"type": "template",
-										"payload": 
-										{
-											"template_type": "generic",
-											"elements": [
-															{
-						            							"title": messageTitle,
-						            							"buttons": buttons
-						            						}
-						            		]
-										}
-									};
-									
-									sendTextMessage(sender, message, 1);
-								}
-							}
-						}
-					} else {
-						message = 'Oops, Looks like Susi is taking a break, She will be back soon';
-						sendTextMessage(sender, message,0);
-					}
-				});
+        		requestReply(sender, 'news');
         	}
 			continue;
 		}

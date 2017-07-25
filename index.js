@@ -61,6 +61,8 @@ function sendTextMessage(sender, text, flag) {
 		} else if (response.body.error) {
 			console.log('Error: ', response.body.error);
 		}
+		typingIndicator(sender,0);
+		console.log('I am off 65');
 	});
 }
 
@@ -119,6 +121,39 @@ request({
 	}
 })
 
+function typingIndicator(sender, flag){
+	var typingState;
+	if(flag === 1)
+	{
+		typingState = {
+		  "recipient":{
+		  	"id":sender
+		  },
+		  "sender_action":"typing_on"
+		};
+	}
+	else{
+		typingState = {
+		  "recipient":{
+		  	"id":sender
+		  },
+		  "sender_action":"typing_off"
+		};
+	}
+	request({
+		url: 'https://graph.facebook.com/v2.6/me/messages',
+		qs: {access_token:token},
+		method: 'POST',
+		json: typingState
+	}, function(error, response, body) {
+		if (error) {
+			console.log('Error sending messages: ', error)
+		} else if (response.body.error) {
+			console.log('Error: ', response.body.error)
+		}
+	});
+}
+
 app.get('/', function (req, res) {
 	res.send('Susi says Hello.');
 });
@@ -133,9 +168,12 @@ app.get('/webhook/', function (req, res) {
 
 // to post data
 app.post('/webhook/', function (req, res) {
-	var messaging_events = req.body.entry[0].messaging
+	var messaging_events = req.body.entry[0].messaging;
+	typingIndicator(req.body.entry[0].messaging[0].sender.id,1);
+	console.log('I am on 173');
 	for (var i = 0; i < messaging_events.length; i++) {
 		var event = req.body.entry[0].messaging[i];
+		console.log(JSON.stringify(event)+'\n');
 		var sender = event.sender.id;
 		if (event.message && event.message.text) {
 			var text = event.message.text;
@@ -244,10 +282,11 @@ app.post('/webhook/', function (req, res) {
 					message = 'Oops, Looks like Susi is taking a break, She will be back soon';
 					sendTextMessage(sender, message,0);
 				}
+				
 			});
 			// sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
 		}
-		if (event.postback) {
+		else if (event.postback) {
 			if(event.postback.payload === 'start_chatting')
         		sendTextMessage(sender, "You can ask me anything. Your questions are my food and I am damn hungry!");
         	else if(event.postback.payload === 'GET_STARTED_PAYLOAD'){
@@ -277,6 +316,10 @@ app.post('/webhook/', function (req, res) {
 	          	sendTextMessage(sender, messageData, 1);
         	}
 			continue;
+		}
+		else{
+			typingIndicator(sender,0);	
+			console.log('I am off 320');
 		}
 	}
 	res.sendStatus(200)

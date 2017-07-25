@@ -39,6 +39,28 @@ var buttons = [
 			        }
 	              } 
 	          ];
+
+function messengerCodeGenerator(){
+	request({
+			url: 'https://graph.facebook.com/v2.6/me/messenger_codes',
+			qs: {access_token:token},
+			method: 'POST',
+			json: {
+					type: "standard",
+					image_size: 1000
+			}
+		}, function(error, response, body) {
+			if (error) {
+				console.log('Error sending messages: ', error);
+			} else if (response.body.error) {
+				console.log('Error: ', response.body.error);
+			}
+			else{
+				console.log('Messenger code - '+response.body);
+			}
+		});
+}
+
 function sendTextMessage(sender, text, flag) {
 	var messageData;
 	if(flag === 1){
@@ -102,22 +124,24 @@ function sendGenericMessage(sender, title, subtitle, image_url) {
 }
 
 // Add a get started button to the messenger
-request({
-	url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
-	qs: {access_token:token},
-	method: 'POST',
-	json: { 
-	  "get_started":{
-	    "payload":"GET_STARTED_PAYLOAD"
-	  }
-	}
-}, function(error, response, body) {
-	if (error) {
-		console.log('Error sending messages: ', error)
-	} else if (response.body.error) {
-		console.log('Error: ', response.body.error)
-	}
-})
+function addGetStartedButton(){
+	request({
+		url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
+		qs: {access_token:token},
+		method: 'POST',
+		json: { 
+		  "get_started":{
+		    "payload":"GET_STARTED_PAYLOAD"
+		  }
+		}
+	}, function(error, response, body) {
+		if (error) {
+			console.log('Error sending messages: ', error)
+		} else if (response.body.error) {
+			console.log('Error: ', response.body.error)
+		}
+	})
+}
 
 app.get('/', function (req, res) {
 	res.send('Susi says Hello.');
@@ -130,6 +154,9 @@ app.get('/webhook/', function (req, res) {
 	}
 	res.send('Error, wrong token');
 });
+
+addGetStartedButton();
+messengerCodeGenerator();
 
 // to post data
 app.post('/webhook/', function (req, res) {

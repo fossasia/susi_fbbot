@@ -62,7 +62,6 @@ function sendTextMessage(sender, text, flag) {
 			console.log('Error: ', response.body.error);
 		}
 		typingIndicator(sender,0);
-		console.log('I am off 65');
 	});
 }
 
@@ -170,7 +169,6 @@ app.get('/webhook/', function (req, res) {
 app.post('/webhook/', function (req, res) {
 	var messaging_events = req.body.entry[0].messaging;
 	typingIndicator(req.body.entry[0].messaging[0].sender.id,1);
-	console.log('I am on 173');
 	for (var i = 0; i < messaging_events.length; i++) {
 		var event = req.body.entry[0].messaging[i];
 		console.log(JSON.stringify(event)+'\n');
@@ -319,7 +317,6 @@ app.post('/webhook/', function (req, res) {
 		}
 		else{
 			typingIndicator(sender,0);	
-			console.log('I am off 320');
 		}
 	}
 	res.sendStatus(200)

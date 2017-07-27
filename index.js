@@ -39,6 +39,28 @@ var buttons = [
 			        }
 	              } 
 	          ];
+
+function messengerCodeGenerator(){
+	request({
+			url: 'https://graph.facebook.com/v2.6/me/messenger_codes',
+			qs: {access_token:token},
+			method: 'POST',
+			json: {
+					type: "standard",
+					image_size: 1000
+			}
+		}, function(error, response, body) {
+			if (error) {
+				console.log('Error sending messages: ', error);
+			} else if (response.body.error) {
+				console.log('Error: ', response.body.error);
+			}
+			else{
+				console.log('Messenger code - '+response.body);
+			}
+		});
+}
+
 function sendTextMessage(sender, text, flag) {
 	var messageData;
 	if(flag === 1){
@@ -61,6 +83,7 @@ function sendTextMessage(sender, text, flag) {
 		} else if (response.body.error) {
 			console.log('Error: ', response.body.error);
 		}
+		typingIndicator(sender,0);
 	});
 }
 
@@ -102,22 +125,57 @@ function sendGenericMessage(sender, title, subtitle, image_url) {
 }
 
 // Add a get started button to the messenger
-request({
-	url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
-	qs: {access_token:token},
-	method: 'POST',
-	json: { 
-	  "get_started":{
-	    "payload":"GET_STARTED_PAYLOAD"
-	  }
+function addGetStartedButton(){
+	request({
+		url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
+		qs: {access_token:token},
+		method: 'POST',
+		json: { 
+		  "get_started":{
+		    "payload":"GET_STARTED_PAYLOAD"
+		  }
+		}
+	}, function(error, response, body) {
+		if (error) {
+			console.log('Error sending messages: ', error)
+		} else if (response.body.error) {
+			console.log('Error: ', response.body.error)
+		}
+	})
+}
+
+function typingIndicator(sender, flag){
+	var typingState;
+	if(flag === 1)
+	{
+		typingState = {
+		  "recipient":{
+		  	"id":sender
+		  },
+		  "sender_action":"typing_on"
+		};
 	}
-}, function(error, response, body) {
-	if (error) {
-		console.log('Error sending messages: ', error)
-	} else if (response.body.error) {
-		console.log('Error: ', response.body.error)
+	else{
+		typingState = {
+		  "recipient":{
+		  	"id":sender
+		  },
+		  "sender_action":"typing_off"
+		};
 	}
-})
+	request({
+		url: 'https://graph.facebook.com/v2.6/me/messages',
+		qs: {access_token:token},
+		method: 'POST',
+		json: typingState
+	}, function(error, response, body) {
+		if (error) {
+			console.log('Error sending messages: ', error)
+		} else if (response.body.error) {
+			console.log('Error: ', response.body.error)
+		}
+	});
+}
 
 
 function requestReply(sender, text){
@@ -293,11 +351,16 @@ app.get('/webhook/', function (req, res) {
 	res.send('Error, wrong token');
 });
 
+addGetStartedButton();
+messengerCodeGenerator();
+
 // to post data
 app.post('/webhook/', function (req, res) {
-	var messaging_events = req.body.entry[0].messaging
+	var messaging_events = req.body.entry[0].messaging;
+	typingIndicator(req.body.entry[0].messaging[0].sender.id,1);
 	for (var i = 0; i < messaging_events.length; i++) {
 		var event = req.body.entry[0].messaging[i];
+		console.log(JSON.stringify(event)+'\n');
 		var sender = event.sender.id;
 		if (event.message && event.message.text) {
 			var text = event.message.text;
@@ -311,7 +374,7 @@ app.post('/webhook/', function (req, res) {
 
 			requestReply(sender, text);
 		}
-		if (event.postback) {
+		else if (event.postback) {
 			if(event.postback.payload === 'start_chatting')
         		sendTextMessage(sender, "You can ask me anything. Your questions are my food and I am damn hungry!");
         	else if(event.postback.payload === 'GET_STARTED_PAYLOAD'){
@@ -344,6 +407,9 @@ app.post('/webhook/', function (req, res) {
         		requestReply(sender, 'news');
         	}
 			continue;
+		}
+		else{
+			typingIndicator(sender,0);	
 		}
 	}
 	res.sendStatus(200)

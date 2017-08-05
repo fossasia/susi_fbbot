@@ -14,31 +14,47 @@ app.use(bodyParser.json());
 // recommended to inject access tokens as environmental variables, e.g.
 var token = process.env.FB_PAGE_ACCESS_TOKEN;
 
-var buttons = [
-	              {
-	                "type":"element_share",
-	              	"share_contents": { 
-			          "attachment": {
-			            "type": "template",
-			            "payload": {
-			              "template_type": "generic",
-			              "elements": [
-			                {
-			                  "title": "I had an amazing chat with SUSI. Do you wanna chat too?",
-			                  "buttons": [
-			                    {
-			                      "type": "web_url",
-			                      "url": "https://m.me/asksusisu", 
-			                      "title": "Chat with SUSI AI"
-			                    }
-			                  ]
-			                }
-			              ]
-			            }
-			          }
-			        }
-	              } 
-	          ];
+var buttons;
+var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+'Share';
+var message = '';
+// Wait until done and reply
+request({
+	url: queryUrl,
+	json: true
+}, function (error, response, body) {
+	if (!error && response.statusCode === 200) {
+		message = body.answers[0].actions[0].expression;
+		buttons = [
+		              {
+		                "type":"element_share",
+		              	"share_contents": { 
+				          "attachment": {
+				            "type": "template",
+				            "payload": {
+				              "template_type": "generic",
+				              "elements": [
+				                {
+				                  "title": message,
+				                  "buttons": [
+				                    {
+				                      "type": "web_url",
+				                      "url": "https://m.me/asksusisu", 
+				                      "title": "Chat with SUSI AI"
+				                    }
+				                  ]
+				                }
+				              ]
+				            }
+				          }
+				        }
+		              } 
+		          ];
+
+	}
+	else{
+		message = 'Oops, Looks like Susi is taking a break, She will be back soon';
+	}
+});
 
 function messengerCodeGenerator(){
 	request({
@@ -212,7 +228,6 @@ function requestReply(sender, text){
 								"elements": arr
 							}
 						};
-						sendTextMessage(sender, message, 1);
 					}
 				}
 				else{
@@ -249,7 +264,6 @@ function requestReply(sender, text){
 								"elements": arr
 							}
 						};
-						sendTextMessage(sender, message, 1);
 					}
 					else
 					{
@@ -267,10 +281,9 @@ function requestReply(sender, text){
 			            		]
 							}
 						};
-						
-						sendTextMessage(sender, message, 1);
 					}
 				}
+				sendTextMessage(sender, message, 1);
 			}
 		} else {
 			message = 'Oops, Looks like Susi is taking a break, She will be back soon';
@@ -375,33 +388,77 @@ app.post('/webhook/', function (req, res) {
 			requestReply(sender, text);
 		}
 		else if (event.postback) {
-			if(event.postback.payload === 'start_chatting')
-        		sendTextMessage(sender, "You can ask me anything. Your questions are my food and I am damn hungry!");
+			if(event.postback.payload === 'start_chatting'){
+        		var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+'Start+chatting';
+				var startMessage = '';
+				// Wait until done and reply
+				request({
+					url: queryUrl,
+					json: true
+				}, function (error, response, body) {
+					if (!error && response.statusCode === 200) {
+						startMessage = body.answers[0].actions[0].expression;
+					}
+					else{
+						startMessage = 'Oops, Looks like Susi is taking a break, She will be back soon';
+					}
+	          		sendTextMessage(sender, startMessage, 0);
+				});
+        	}
         	else if(event.postback.payload === 'GET_STARTED_PAYLOAD'){
-        		var messageData = {
-	              "type":"template",
-	              "payload":{
-	                "template_type":"generic",
-	                "elements":[
-	                   {
-	                    "title":"Welcome to SUSI AI",
-	                    "subtitle":"I am built by open source community Fossasia. Also, I am evolving continuously.",
-	                    "buttons":[
-	                      {
-	                        "type":"web_url",
-	                        "url":"https://github.com/fossasia/susi_server",
-	                        "title":"View Repository"
-	                      },{
-	                        "type":"postback",
-	                        "title":"Start Chatting",
-	                        "payload":"start_chatting"
-	                      }              
-	                    ]      
-	                  }
-	                ]
-	              }
-	            }
-	          	sendTextMessage(sender, messageData, 1);
+        		var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+'Welcome';
+				var welMessage = '';
+				// Wait until done and reply
+				request({
+					url: queryUrl,
+					json: true
+				}, function (error, response, body) {
+					if (!error && response.statusCode === 200) {
+						welMessage = body.answers[0].actions[0].expression;
+					}
+					else{
+						welMessage = 'Oops, Looks like Susi is taking a break, She will be back soon';
+					}
+
+					var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+'Get+started';
+					var introMessage = '';
+					// Wait until done and reply
+					request({
+						url: queryUrl,
+						json: true
+					}, function (error, response, body) {
+						if (!error && response.statusCode === 200) {
+							introMessage = body.answers[0].actions[0].expression;
+						}
+						else{
+							introMessage = 'Oops, Looks like Susi is taking a break, She will be back soon';
+						}
+		        		var messageData = {
+			              "type":"template",
+			              "payload":{
+			                "template_type":"generic",
+			                "elements":[
+			                   {
+			                    "title":welMessage,
+			                    "subtitle":introMessage,
+			                    "buttons":[
+			                      {
+			                        "type":"web_url",
+			                        "url":"https://github.com/fossasia/susi_server",
+			                        "title":"View Repository"
+			                      },{
+			                        "type":"postback",
+			                        "title":"Start Chatting",
+			                        "payload":"start_chatting"
+			                      }              
+			                    ]      
+			                  }
+			                ]
+			              }
+			            }
+			          	sendTextMessage(sender, messageData, 1);
+			        });
+				});
         	}
         	else if(event.postback.payload === 'latest_news'){
         		requestReply(sender, 'news');

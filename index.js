@@ -103,41 +103,27 @@ function sendTextMessage(sender, text, flag) {
 	});
 }
 
-function sendGenericMessage(sender, title, subtitle, image_url) {
-	var messageData = {
-		"attachment": {
-			"type": "template",
-			"payload": {
-				"template_type": "generic",
-				"elements": [{
-					"title": title,
-					"subtitle": subtitle,
-					"image_url": image_url
-				}]
-			}
-		}
-	};
-	request({
-		url: 'https://graph.facebook.com/v2.6/me/messages',
-		qs: {access_token:token},
-		method: 'POST',
-		json: {
-			recipient: {
-				/* The phone_number field can also be used instead of id field here, to message the owner of that phone number:
-				 * phone_number: "FILL_HERE_PHONE_NUMBER",
-				 * till now this feature can be used for developers, testers and admins of the ask susi fb page.
-				 */
-				id:sender
-			},
-			message: messageData,
-		}
-	}, function(error, response, body) {
-		if (error) {
-			console.log('Error sending messages: ', error)
-		} else if (response.body.error) {
-			console.log('Error: ', response.body.error)
-		}
-	})
+function sendGenericMessage(sender, message, url, buttonTitle){
+	var messageT = {
+					"type": "template",
+					"payload": 
+					{
+						"template_type": "generic",
+						"elements": [
+										{
+	            							"title": message,
+	            							"buttons": [
+									                    {
+									                      "type": "web_url",
+									                      "url": url, 
+									                      "title": buttonTitle
+									                    }
+									                  ]
+	            						}
+	            		]
+					}
+				};
+	sendTextMessage(sender, messageT, 1);
 }
 
 // Add a get started button to the messenger
@@ -388,6 +374,7 @@ app.post('/webhook/', function (req, res) {
 			requestReply(sender, text);
 		}
 		else if (event.postback) {
+			var errMessage = 'Oops, Looks like Susi is taking a break, She will be back soon';
 			if(event.postback.payload === 'start_chatting'){
         		var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+'Start+chatting';
 				var startMessage = '';
@@ -400,11 +387,49 @@ app.post('/webhook/', function (req, res) {
 						startMessage = body.answers[0].actions[0].expression;
 					}
 					else{
-						startMessage = 'Oops, Looks like Susi is taking a break, She will be back soon';
+						startMessage = errMessage;
 					}
 	          		sendTextMessage(sender, startMessage, 0);
 				});
         	}
+        	else if(event.postback.payload === "start_contributing"){
+				var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+'Contribution';
+				var contributeMessage = '';
+
+				// Wait until done and reply
+				request({
+					url: queryUrl,
+					json: true
+				}, function (error, response, body) {
+					if (!error && response.statusCode === 200) {
+						contributeMessage = body.answers[0].actions[0].expression;
+					}
+					else{
+						contributeMessage = errMessage;
+					}
+					var url = "https://github.com/fossasia/susi_server";
+					var buttonTitle = "Visit repository";
+					sendGenericMessage(sender, contributeMessage, url, buttonTitle);
+
+					var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+'Gitter+channel';
+					var gitterMessage = '';
+					// Wait until done and reply
+					request({
+						url: queryUrl,
+						json: true
+					}, function (error, response, body) {
+						if (!error && response.statusCode === 200) {
+							gitterMessage = body.answers[0].actions[0].expression;
+						}
+						else{
+							gitterMessage = errMessage;
+						}
+						url = "https://gitter.im/fossasia/susi_server";
+						buttonTitle = "Chat on Gitter"
+						sendGenericMessage(sender, gitterMessage, url, buttonTitle);
+					});
+				});
+			}
         	else if(event.postback.payload === 'GET_STARTED_PAYLOAD'){
         		var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+'Welcome';
 				var welMessage = '';
@@ -417,7 +442,7 @@ app.post('/webhook/', function (req, res) {
 						welMessage = body.answers[0].actions[0].expression;
 					}
 					else{
-						welMessage = 'Oops, Looks like Susi is taking a break, She will be back soon';
+						welMessage = errMessage;
 					}
 
 					var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+'Get+started';
@@ -431,7 +456,7 @@ app.post('/webhook/', function (req, res) {
 							introMessage = body.answers[0].actions[0].expression;
 						}
 						else{
-							introMessage = 'Oops, Looks like Susi is taking a break, She will be back soon';
+							introMessage = errMessage;
 						}
 		        		var messageData = {
 			              "type":"template",
@@ -450,7 +475,11 @@ app.post('/webhook/', function (req, res) {
 			                        "type":"postback",
 			                        "title":"Start Chatting",
 			                        "payload":"start_chatting"
-			                      }              
+			                      },{
+			                        "type":"postback",
+			                        "title":"How to contribute?",
+			                        "payload":"start_contributing"
+			                      }                 
 			                    ]      
 			                  }
 			                ]

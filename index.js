@@ -210,7 +210,7 @@ function requestReply(sender, text){
 							"type": "template",
 							"payload": 
 							{
-								"template_type": "genric",
+								"template_type": "generic",
 								"elements": arr
 							}
 						};
@@ -246,7 +246,7 @@ function requestReply(sender, text){
 							"type": "template",
 							"payload": 
 							{
-								"template_type": "genric",
+								"template_type": "generic",
 								"elements": arr
 							}
 						};

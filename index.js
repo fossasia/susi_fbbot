@@ -292,7 +292,7 @@ function persistentMenuGenerator(){
 				        {
 				          "type":"postback",
 				          "title":"Latest News",
-	                      "payload":"latest_news"
+	                      "payload":"news"
 				        },{
 				          "type":"web_url",
 				          "title":"Visit Repository",
@@ -390,6 +390,35 @@ app.post('/webhook/', function (req, res) {
 						startMessage = errMessage;
 					}
 	          		sendTextMessage(sender, startMessage, 0);
+
+	          		var messageT = {
+						"type": "template",
+						"payload": 
+						{
+							"template_type": "generic",
+							"elements": [
+											{
+		            							"title": 'You can try the following:',
+		            							"buttons": [
+														        {
+														          "type":"postback",
+														          "title":"What is FOSSASIA?",
+											                      "payload":"What is FOSSASIA?"
+														        },{
+														          "type":"postback",
+														          "title":"Who is Einstein?",
+											                      "payload":"Who is Einstein?"
+														        },{
+														          "type":"postback",
+														          "title":"Borders with INDIA",
+											                      "payload":"Borders with INDIA"
+														        }
+														    ]
+		            						}
+		            		]
+						}
+					};
+					sendTextMessage(sender, messageT, 1);
 				});
         	}
         	else if(event.postback.payload === "start_contributing"){
@@ -489,8 +518,8 @@ app.post('/webhook/', function (req, res) {
 			        });
 				});
         	}
-        	else if(event.postback.payload === 'latest_news'){
-        		requestReply(sender, 'news');
+        	else{
+        		requestReply(sender, event.postback.payload);
         	}
 			continue;
 		}

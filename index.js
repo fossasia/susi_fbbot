@@ -5,7 +5,7 @@ var request = require('request');
 var http = require("http");
 
 var app = express();
-app.set('port', (process.env.PORT || 5000));
+app.set('port', (process.env.PORT || 8080));
 
 app.use(bodyParser.urlencoded({extended: false}));
 
@@ -505,8 +505,3 @@ app.post('/webhook/', function (req, res) {
 app.listen(app.get('port'), function() {
 	console.log('running on port', app.get('port'));
 });
-
-// to keep heroku active
-setInterval(function() {
-  https.get(process.env.HerokuUrl);
-}, 1200000);

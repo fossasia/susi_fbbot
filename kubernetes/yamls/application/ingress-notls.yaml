@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: facebook
+  namespace: facebook
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: susi-facebook.tk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: facebook
+          servicePort: 80

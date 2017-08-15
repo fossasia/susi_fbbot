@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx4
+  namespace: nginx-ingress4
+spec:
+  type: LoadBalancer
+  loadBalancerIP: '35.202.12.100'
+  ports:
+  - port: 80
+    name: http
+  - port: 443
+    name: https
+  selector:
+    app: nginx4

@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: facebook
+  namespace: facebook
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: facebook
+    spec:
+      containers:
+      - name: facebook
+        image: fossasia/susi_fbbot:latest-development
+        imagePullPolicy: Always
+        env: 
+        - name: FB_PAGE_ACCESS_TOKEN
+          value: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        ports:
+        - containerPort: 8080

@@ -38,7 +38,7 @@ request({
 				                  "buttons": [
 				                    {
 				                      "type": "web_url",
-				                      "url": "https://m.me/asksusisu", 
+				                      "url": "https://m.me/asksusiai", 
 				                      "title": "Chat with SUSI AI"
 				                    }
 				                  ]
@@ -215,10 +215,8 @@ function requestReply(sender, text){
 							}
 						};
 					}
-				}
-				else{
-					if(body.answers[0].actions[0].type === 'table'){
-						var colNames = body.answers[0].actions[0].columns;
+					else if(body.answers[0].actions[1].type === 'table'){
+						var colNames = body.answers[0].actions[1].columns;
 						if((body.answers[0].metadata.count)>10)
 							sendTextMessage(sender, "Due to message limit, only some results are shown:", 0);
 						else
@@ -251,23 +249,22 @@ function requestReply(sender, text){
 							}
 						};
 					}
-					else
-					{
-						var messageTitle = body.answers[0].actions[0].expression;
-						message = {
-							"type": "template",
-							"payload": 
-							{
-								"template_type": "generic",
-								"elements": [
-												{
-			            							"title": messageTitle,
-			            							"buttons": buttons
-			            						}
-			            		]
-							}
-						};
-					}
+				}
+				else{
+					var messageTitle = body.answers[0].actions[0].expression;
+					message = {
+						"type": "template",
+						"payload": 
+						{
+							"template_type": "generic",
+							"elements": [
+											{
+		            							"title": messageTitle,
+		            							"buttons": buttons
+		            						}
+		            		]
+						}
+					};
 				}
 				sendTextMessage(sender, message, 1);
 			}

@@ -38,7 +38,7 @@ request({
 				                  "buttons": [
 				                    {
 				                      "type": "web_url",
-				                      "url": "https://m.me/asksusisu", 
+				                      "url": "https://m.me/asksusiai", 
 				                      "title": "Chat with SUSI AI"
 				                    }
 				                  ]
@@ -268,23 +268,22 @@ function requestReply(sender, text){
 							}
 						};
 					}
-					else
-					{
-						var messageTitle = body.answers[0].actions[0].expression;
-						message = {
-							"type": "template",
-							"payload": 
-							{
-								"template_type": "generic",
-								"elements": [
-												{
-			            							"title": messageTitle,
-			            							"buttons": buttons
-			            						}
-			            		]
-							}
-						};
-					}
+				}
+				else{
+					var messageTitle = body.answers[0].actions[0].expression;
+					message = {
+						"type": "template",
+						"payload": 
+						{
+							"template_type": "generic",
+							"elements": [
+											{
+		            							"title": messageTitle,
+		            							"buttons": buttons
+		            						}
+		            		]
+						}
+					};
 				}
 				sendTextMessage(sender, message, 1);
 			}

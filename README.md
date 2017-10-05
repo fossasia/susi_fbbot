@@ -8,7 +8,7 @@ This is the  Facebook messenger bot for [AskSusi](https://github.com/fossasia/su
 
 ## Getting Started
 
-To set up your own Messenger Bot for Susi, please check out the [Getting Started Guide](/docs/getting_started.md).
+To set up your own Messenger Bot for Susi, please check out the [Getting Started Guide](/docs/installations/getting_started.md).
 
 ![Susi Messenger](docs/images/messenger_screenshot.png "Susi Messenger")
 

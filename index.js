@@ -215,8 +215,27 @@ function requestReply(sender, text){
 							}
 						};
 					}
-					else if(body.answers[0].actions[1].type === 'table'){
-						var colNames = body.answers[0].actions[1].columns;
+					else if(body.answers[0].actions[2].type === 'map'){
+						var mapMessage = body.answers[0].actions[0].expression;
+						var lat = body.answers[0].actions[2].latitude, lon = body.answers[0].actions[2].longitude;
+						console.log(lat +" "+ lon + " "+ mapMessage);
+						message = {
+			              "type":"template",
+			              "payload":{
+			                "template_type":"generic",
+			                "elements":[{
+			                        "title": mapMessage,
+			                        "image_url": "https://open.mapquestapi.com/staticmap/v4/getmap?key=0OlPA2eN9Bx9AyCLx15G5KbogcMJgRfM&size=600,400&zoom=13&center="+lat+","+lon,
+			                        "item_url": body.answers[0].actions[1].link
+			                    }
+			                ]
+			              }
+			            };
+					}
+				}
+				else{
+					if(body.answers[0].actions[0].type === 'table'){
+						var colNames = body.answers[0].actions[0].columns;
 						if((body.answers[0].metadata.count)>10)
 							sendTextMessage(sender, "Due to message limit, only some results are shown:", 0);
 						else

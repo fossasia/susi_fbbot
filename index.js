@@ -182,7 +182,7 @@ function typingIndicator(sender, flag){
 
 function requestReply(sender, text){
 	// Construct the query for susi
-	var queryUrl = 'http://api.asksusi.com/susi/chat.json?q='+encodeURI(text);
+	var queryUrl = 'https://api.susi.ai/susi/chat.json?q='+encodeURI(text);
 	var message = '';
 	// Wait until done and reply
 	request({
@@ -238,7 +238,7 @@ function requestReply(sender, text){
 						var colNames = body.answers[0].actions[0].columns;
 						if((body.answers[0].metadata.count)>10)
 							sendTextMessage(sender, "Due to message limit, only some results are shown:", 0);
-						elsehttp://api.asksusi.com/susi/chat.json?q=
+						elsehttps://api.susi.ai/susi/chat.json?q=
 							sendTextMessage(sender, "Results are shown below:", 0);
 						var metaCnt = body.answers[0].metadata.count;
 						var arr = [];

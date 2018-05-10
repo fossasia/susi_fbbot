@@ -238,7 +238,7 @@ function requestReply(sender, text){
 						var colNames = body.answers[0].actions[0].columns;
 						if((body.answers[0].metadata.count)>10)
 							sendTextMessage(sender, "Due to message limit, only some results are shown:", 0);
-						else
+						elsehttp://api.asksusi.com/susi/chat.json?q=
 							sendTextMessage(sender, "Results are shown below:", 0);
 						var metaCnt = body.answers[0].metadata.count;
 						var arr = [];
@@ -268,7 +268,6 @@ function requestReply(sender, text){
 							}
 						};
 					}
-				}
 				else{
 					var messageTitle = body.answers[0].actions[0].expression;
 					message = {
@@ -285,6 +284,7 @@ function requestReply(sender, text){
 						}
 					};
 				}
+			}
 				sendTextMessage(sender, message, 1);
 			}
 		} else {

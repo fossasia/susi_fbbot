@@ -6,7 +6,7 @@ Master [![Build Status](https://travis-ci.org/fossasia/susi_fbbot.svg?branch=mas
 [![Code Climate](https://codeclimate.com/github/fossasia/susi_fbbot/badges/gpa.svg)](https://codeclimate.com/github/fossasia/susi_fbbot)
 [![Join the chat at https://gitter.im/fossasia/susi_server](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fossasia/susi_server)
 
-This is the  Facebook messenger bot for [AskSusi](https://github.com/fossasia/susi_server).
+This is the  Facebook messenger bot for [AskSusi](https://www.m.me/asksusiai).
 
 ## Technology Stack
 

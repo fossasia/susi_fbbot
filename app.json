@@ -1,0 +1,21 @@
+{
+  "name": "susi_fbbot",
+  "description": "Facebook messenger bot for AskSusi",
+  "repository": "https://github.com/fossasia/susi_fbbot/",
+  "logo": "http://labs.fossasia.org/images/susi.png",
+  "keywords": [
+    "susi",
+    "fossasia"
+  ],
+  "addons": [
+    
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "scripts": {
+    
+  }
+}

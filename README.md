@@ -8,6 +8,9 @@ Master [![Build Status](https://travis-ci.org/fossasia/susi_fbbot.svg?branch=mas
 
 This is the  Facebook messenger bot for [AskSusi](https://www.m.me/asksusiai).
 
+
+[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/fossasia/susi_fbbot) [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/fossasia/susi_fbbot)
+
 ## Technology Stack
 
 ```node.js``` and ```Express```.

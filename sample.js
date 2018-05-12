@@ -1,6 +1,6 @@
-var request = require("request")
+var request = require("request");
 
-var url = "http://api.asksusi.com/susi/chat.json?q=Hi I am Sudheesh"
+var url = "http://api.susi.ai/susi/chat.json?q=Hi I am Sudheesh";
 
 request({
     url: url,
@@ -10,4 +10,4 @@ request({
     if (!error && response.statusCode === 200) {
         console.log(body.answers[0].actions[0].expression); // Print the json response
     }
-})
+});

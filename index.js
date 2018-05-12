@@ -182,7 +182,7 @@ function typingIndicator(sender, flag){
 
 function requestReply(sender, text){
 	// Construct the query for susi
-	var queryUrl = 'http://api.asksusi.com/susi/chat.json?q='+encodeURI(text);
+	var queryUrl = 'http://api.susi.ai/susi/chat.json?q='+encodeURI(text);
 	var message = '';
 	// Wait until done and reply
 	request({
